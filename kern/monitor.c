@@ -24,6 +24,7 @@ struct Command {
 static struct Command commands[] = {
 	{ "help", "Display this list of commands", mon_help },
 	{ "kerninfo", "Display information about the kernel", mon_kerninfo },
+	{ "backtrace", "trace back through stack to find debugging infomation", mon_backtrace}
 };
 
 /***** Implementations of basic kernel monitor commands *****/
@@ -58,6 +59,21 @@ int
 mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 {
 	// Your code here.
+	uint32_t ebp, eip;
+	asm volatile("movl %%ebp,%0" : "=r" (ebp));
+	uint32_t * ptr = (uint32_t*)ebp;
+
+	while(ebp != 0)
+	{
+		cprintf("ebp %x eip %x args %08x %08x %08x %08x %08x\n", ebp, *(ptr+1), 
+		        *(ptr+2), *(ptr+3), *(ptr+4), *(ptr+5), *(ptr+6));
+		struct Eipdebuginfo info;
+		debuginfo_eip(*(ptr+1), &info);
+		cprintf("%s:%d: %.*s+%d\n", (&info)->eip_file, (&info)->eip_line, 
+				(&info)->eip_fn_namelen, (&info)->eip_fn_name, *(ptr+1)-(&info)->eip_fn_addr);
+		ebp = *(ptr);
+		ptr = (uint32_t*)ebp;
+	}
 	return 0;
 }
 
