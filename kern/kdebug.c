@@ -180,6 +180,23 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 	//	which one.
 	// Your code here.
 
+	int findit = -1;
+	for(int ii=lline; ii <= rline; ii++)
+	{
+		if(stabs[ii].n_type == 0x44)
+		{
+			if(stabs[ii].n_value <= addr && stabs[ii+1].n_value > addr)
+			{
+				info->eip_line = stabs[ii].n_desc;
+				findit = 0;
+			}
+		}
+	}
+
+	if(findit == -1)
+	{
+		return -1;
+	}
 
 	// Search backwards from the line number for the relevant filename
 	// stab.
