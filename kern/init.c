@@ -9,8 +9,6 @@
 #include <kern/pmap.h>
 #include <kern/kclock.h>
 
-<<<<<<< HEAD
-=======
 
 
 
@@ -25,7 +23,6 @@ test_backtrace(int x)
 		mon_backtrace(0, 0, 0);
 	cprintf("leaving test_backtrace %d\n", x);
 }
->>>>>>> lab1
 
 void
 i386_init(void)
