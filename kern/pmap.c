@@ -134,7 +134,7 @@ mem_init(void)
 	i386_detect_memory();
 
 	// Remove this line when you're ready to test this function.
-	panic("mem_init: This function is not finished\n");
+	//panic("mem_init: This function is not finished\n");
 
 	//////////////////////////////////////////////////////////////////////
 	// create initial page directory.
@@ -157,7 +157,7 @@ mem_init(void)
 	// array.  'npages' is the number of physical pages in memory.  Use memset
 	// to initialize all fields of each struct PageInfo to 0.
 	// Your code goes here:
-
+	pages = (struct PageInfo*)boot_alloc(npages*sizeof(struct PageInfo));
 	memset(pages, 0, npages*sizeof(struct PageInfo));
 
 
@@ -168,7 +168,6 @@ mem_init(void)
 	// particular, we can now map memory using boot_map_region
 	// or page_insert
 	page_init();
-
 	check_page_free_list(1);
 	check_page_alloc();
 	check_page();
@@ -263,11 +262,11 @@ page_init(void)
 	// NB: DO NOT actually touch the physical memory corresponding to
 	// free pages!
 	size_t i;
-	
 	for (i = 0; i < npages; i++) {
 		pages[i].pp_ref = 0;
 		pages[i].pp_link = page_free_list;
-		if( i == 0 || (i >= IOPHYSMEM/4 && i < EXTPHYSMEM/4)){
+		// 4MB, which is mentioned in ;entry.S'
+		if( i == 0 || (i >= IOPHYSMEM/PGSIZE && i < 1024)){
 			continue;
 		}
 		page_free_list = &pages[i];
@@ -290,17 +289,15 @@ struct PageInfo *
 page_alloc(int alloc_flags)
 {
 	// Fill this function in
-	if(alloc_flags && ALLOC_ZERO){
-		if(page_free_list == 0){
-			return NULL;
-		}
-		memset(page2kva(page_free_list), '\0', PGSIZE);
-		struct PageInfo * alloc_addr = page_free_list;
-		page_free_list = page_free_list->pp_link;
-		alloc_addr->pp_link = NULL;
-		return alloc_addr;
+	if(page_free_list == 0){
+		return NULL;
 	}
-	return 0;
+	if(alloc_flags && ALLOC_ZERO)
+		memset(page2kva(page_free_list), '\0', PGSIZE);
+	struct PageInfo * alloc_addr = page_free_list;
+	page_free_list = page_free_list->pp_link;
+	alloc_addr->pp_link = NULL;
+	return alloc_addr;
 }
 
 //
@@ -499,7 +496,6 @@ check_page_free_list(bool only_low_memory)
 	for (pp = page_free_list; pp; pp = pp->pp_link)
 		if (PDX(page2pa(pp)) < pdx_limit)
 			memset(page2kva(pp), 0x97, 128);
-
 	first_free_page = (char *) boot_alloc(0);
 	for (pp = page_free_list; pp; pp = pp->pp_link) {
 		// check that we didn't corrupt the free list itself
