@@ -34,19 +34,19 @@ static const char * const error_string[MAXERROR] =
  */
 static void
 printnum(void (*putch)(int, void*), void *putdat,
-	 unsigned long long num, unsigned base, int width, int padc)
+	 unsigned long long num, unsigned base, int width, int padc, int color_mode)
 {
 	// first recursively print all preceding (more significant) digits
 	if (num >= base) {
-		printnum(putch, putdat, num / base, base, width - 1, padc);
+		printnum(putch, putdat, num / base, base, width - 1, padc, color_mode);
 	} else {
 		// print any needed pad characters before first digit
 		while (--width > 0)
-			putch(padc, putdat);
+			putch(padc | color_mode, putdat);
 	}
 
 	// then print this (the least significant) digit
-	putch("0123456789abcdef"[num % base], putdat);
+	putch("0123456789abcdef"[num % base] | color_mode, putdat);
 }
 
 // Get an unsigned int of various possible sizes from a varargs list,
@@ -87,12 +87,28 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 	unsigned long long num;
 	int base, lflag, width, precision, altflag;
 	char padc;
+	int color_mode = 0;
 
 	while (1) {
-		while ((ch = *(unsigned char *) fmt++) != '%') {
+		while ((ch = *(unsigned char *) fmt++) != '%' && ch != '@' ) {
 			if (ch == '\0')
 				return;
-			putch(ch, putdat);
+			putch(ch | color_mode, putdat);
+		}
+
+		if(ch == '@'){
+			switch (ch = *(unsigned char *) fmt++){
+				case 'R': color_mode = 4 << 8;break;
+				case 'G': color_mode = 2 << 8;break;
+				case 'B': color_mode = 9 << 8;break;
+				case 'Y': color_mode = 6 << 8;break;
+				default:
+					putch('@' | color_mode, putdat);
+					for (fmt--; fmt[-1] != '@'; fmt--)
+						/* do nothing */;
+					break;
+			}
+			continue;
 		}
 
 		// Process a %-escape sequence
@@ -157,7 +173,7 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 
 		// character
 		case 'c':
-			putch(va_arg(ap, int), putdat);
+			putch(va_arg(ap, int) | color_mode, putdat);
 			break;
 
 		// error message
@@ -166,9 +182,9 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 			if (err < 0)
 				err = -err;
 			if (err >= MAXERROR || (p = error_string[err]) == NULL)
-				printfmt(putch, putdat, "error %d", err);
+				printfmt(putch, putdat, "@Rerror %d", err);
 			else
-				printfmt(putch, putdat, "%s", p);
+				printfmt(putch, putdat, "@R%s", p);
 			break;
 
 		// string
@@ -177,12 +193,12 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 				p = "(null)";
 			if (width > 0 && padc != '-')
 				for (width -= strnlen(p, precision); width > 0; width--)
-					putch(padc, putdat);
+					putch(padc | color_mode, putdat);
 			for (; (ch = *p++) != '\0' && (precision < 0 || --precision >= 0); width--)
 				if (altflag && (ch < ' ' || ch > '~'))
-					putch('?', putdat);
+					putch('?' | color_mode, putdat);
 				else
-					putch(ch, putdat);
+					putch(ch | color_mode, putdat);
 			for (; width > 0; width--)
 				putch(' ', putdat);
 			break;
@@ -191,7 +207,7 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 		case 'd':
 			num = getint(&ap, lflag);
 			if ((long long) num < 0) {
-				putch('-', putdat);
+				putch('-'| color_mode, putdat);
 				num = -(long long) num;
 			}
 			base = 10;
@@ -212,8 +228,8 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 
 		// pointer
 		case 'p':
-			putch('0', putdat);
-			putch('x', putdat);
+			putch('0' | color_mode, putdat);
+			putch('x' | color_mode, putdat);
 			num = (unsigned long long)
 				(uintptr_t) va_arg(ap, void *);
 			base = 16;
@@ -224,17 +240,17 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 			num = getuint(&ap, lflag);
 			base = 16;
 		number:
-			printnum(putch, putdat, num, base, width, padc);
+			printnum(putch, putdat, num, base, width, padc, color_mode);
 			break;
 
 		// escaped '%' character
 		case '%':
-			putch(ch, putdat);
+			putch(ch | color_mode, putdat);
 			break;
 
 		// unrecognized escape sequence - just print it literally
 		default:
-			putch('%', putdat);
+			putch('%' | color_mode, putdat);
 			for (fmt--; fmt[-1] != '%'; fmt--)
 				/* do nothing */;
 			break;

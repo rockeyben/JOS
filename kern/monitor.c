@@ -24,10 +24,48 @@ struct Command {
 static struct Command commands[] = {
 	{ "help", "Display this list of commands", mon_help },
 	{ "kerninfo", "Display information about the kernel", mon_kerninfo },
-	{ "backtrace", "trace back through stack to find debugging infomation", mon_backtrace}
+	{ "backtrace", "trace back through stack to find debugging infomation", mon_backtrace},
+	{ "ansi", "print colorful text!", ansi_print}
 };
 
 /***** Implementations of basic kernel monitor commands *****/
+
+int ansi_print(int argc, char **argv, struct Trapframe *tf)
+{
+	if (argc != 3){
+		cprintf("-----------------------------------------------\n");
+		cprintf("| About ansi:                                 |\n");
+		cprintf("| You should type in command in such a form:  |\n");
+		cprintf("|                                             |\n");
+		cprintf("|  ansi --[color name] [Text]                 |\n");
+		cprintf("|                                             |\n");
+		cprintf("| Now we support four colors:                 |\n");
+		cprintf("| @R red ");
+		cprintf("|@G green ");
+		cprintf("|@B blue ");
+		cprintf("|@Y yellow");
+		cprintf("                |\n");
+		cprintf("-----------------------------------------------\n");
+	}
+	else{
+		if(strcmp(argv[1], "--red") == 0){
+			cprintf("@R%s\n", argv[2]);
+		}
+		else if(strcmp(argv[1], "--green") == 0){
+			cprintf("@G%s\n", argv[2]);
+		}
+		else if(strcmp(argv[1], "--blue") == 0){
+			cprintf("@B%s\n", argv[2]);
+		}
+		else if(strcmp(argv[1], "--yellow") == 0){
+			cprintf("@Y%s\n", argv[2]);
+		}
+		else{
+			cprintf("no such color\n");
+		}
+	}
+	return 0;
+}
 
 int
 mon_help(int argc, char **argv, struct Trapframe *tf)

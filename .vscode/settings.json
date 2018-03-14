@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "console.h": "c",
+        "monitor.h": "c",
+        "string.h": "c"
+    }
+}
