@@ -184,9 +184,7 @@ mem_init(void)
 	// Your code goes here:
 
 	uint32_t nn = ROUNDUP(npages*sizeof(struct PageInfo), PGSIZE);
-	for(int i = 0; i < nn; i+=PGSIZE){
-		page_insert(kern_pgdir, pa2page(PADDR(pages)+i), (void*)(UPAGES + i), PTE_U | PTE_P);
-	}
+	boot_map_region(kern_pgdir, UPAGES, nn, PADDR(pages), PTE_W | PTE_P);
 	
 
 	//////////////////////////////////////////////////////////////////////
@@ -201,9 +199,7 @@ mem_init(void)
 	//     Permissions: kernel RW, user NONE
 	// Your code goes here:
 
-	for(int i = 0; i < KSTKSIZE; i+=PGSIZE){
-		page_insert(kern_pgdir, pa2page(PADDR(bootstack)+i), (void*)(KSTACKTOP-KSTKSIZE+i), PTE_W | PTE_P);
-	}
+	boot_map_region(kern_pgdir, KSTACKTOP-KSTKSIZE, KSTKSIZE, PADDR(bootstack), PTE_W|PTE_P);
 
 
 
