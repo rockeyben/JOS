@@ -103,7 +103,7 @@ __attribute__是用来对某一个结构体做一些限制的，而__aligned__�
 
 是jmp后的第一句，因为set cr0之后还在低地址空间，通过一个jmp跳到高地址空间。
 
-````asm
+```asm
 movl $0x0,%ebp
 ```
 
@@ -119,6 +119,7 @@ case 'o':
     base = 8;
     goto number;
 ```
+
 
 目的是为了达成八进制的打印。可以根据十进制或者十六进制的解析方式，举一反三，很容易得到修改的方式。其实就是先把要打印的数值得到，然后把进制得到，之后number处的代码会处理好后续的问题。
 
@@ -218,8 +219,8 @@ He110 World
 
 - 在entry.S里:
 ``` asm
-movl	$0x0,%ebp			# nuke frame pointer
-movl	$(bootstacktop),%esp
+	ovl	$0x0,%ebp			# nuke frame pointer
+	ovl	$(bootstacktop),%esp
 ```
 - 0xf0110000 esp
 - 在enrty.S的最下面的.data段，利用.space语句（这个语句专门用来开空间的）开辟了一段大小为KSTKSIZE的空间，用做Kernel自己的stack空间。
@@ -265,7 +266,6 @@ f010006b:	eb 11                	jmp    f010007e <test_backtrace+0x3e>
 
 - 5个args
 
-  ​
 
   实现的核心，我认为要就是要搞清楚以下几个问题：
 
@@ -320,7 +320,7 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 	uint32_t ebp, eip;
 	asm volatile("movl %%ebp,%0" : "=r" (ebp));
 	uint32_t * ptr = (uint32_t*)ebp;
-
+	
 	while(ebp != 0)
 	{
 		cprintf("ebp %x eip %x args %08x %08x %08x %08x %08x\n", ebp, *(ptr+1), 
@@ -383,7 +383,7 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 	uint32_t ebp, eip;
 	asm volatile("movl %%ebp,%0" : "=r" (ebp));
 	uint32_t * ptr = (uint32_t*)ebp;
-
+	
 	while(ebp != 0)
 	{
 		cprintf("ebp %x eip %x args %08x %08x %08x %08x %08x\n", ebp, *(ptr+1), 
@@ -442,7 +442,7 @@ while (1) {
             return;
         putch(ch | color_mode, putdat);
     }
-
+    
     if(ch == '@'){
         switch (ch = *(unsigned char *) fmt++){
             case 'R': color_mode = 4 << 8;break;
@@ -487,4 +487,3 @@ ansi --red error
 ```
 
 目前支持输入red, blue, yellow, green。欢迎尝试。
-
