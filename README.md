@@ -86,7 +86,8 @@ ELF文件以一个header开头，这个header里包含了很多信息，其中�
 如果想要对ELF文件有详细的了解，欢迎选修体系实习，体验手动解析elf的快感：）
 
 
-###Excercise 7
+### Exercise 7
+
 
 - OS经常在非常高的地址空间运行，比如0xf0100000, 目的是为了让低的空间给用户使用。
 
@@ -107,7 +108,7 @@ __attribute__是用来对某一个结构体做一些限制的，而__aligned__�
 movl $0x0,%ebp
 ```
 
-### Excercise 8
+### Exercise 8
 
 修改代码如下：
 
