@@ -2,15 +2,15 @@
 
 薛犇 1500012752
 
-### Exercise 1
+## Exercise 1
 
 第一个练习是让我们熟悉一下x86汇编语法，由于之前上过微机实验，所以这部分还OK
 
-### Exercise 2
+## Exercise 2
 
 这个部分是让熟悉一下qemu自带的gdb的调试方式。这里遇到过一个小坑，我以为让开两个terminal然后一个make qemu-gdb一个make gdb是为了对比，结果发现它是采用了一个类似ipython那样的机制，把gdb在本地服务器上封装，所以开两个窗口是必须的。
 
-### Exercise 3
+## Exercise 3
 
 **1Q: At what point does the processor start executing 32-bit code? What exactly causes the switch from 16- to 32-bit mode?**
 
@@ -51,13 +51,13 @@ va： 0xf010000c
 
 
 
-### Exercise 4
+## Exercise 4
 
 关于C语言的简介，还有理解指针。
 
 
 
-### Exercise 5
+## Exercise 5
 
 关于链接地址（VMA）和加载地址（LMA），链接地址是编译器以为程序应该执行的（虚拟内存）位置，而加载地址是程序实际在内存（准确的说是虚拟内存）中存在的位置，一般来说两者是一致的，如果改了会发生错误。
 
@@ -69,7 +69,7 @@ $(V)$(LD) $(LDFLAGS) -N -e start -Ttext 0x7C00 -o $@.out $^
 
 虽然不一定完全看懂，但是可以猜测到，它是通过-Ttext把0x7c00链接到start这个符号上的，而start就是汇编asm中最常见的那个入口地址。
 
-### Exercise 6
+## Exercise 6
 
 关于ELF文件：
 
@@ -86,7 +86,7 @@ ELF文件以一个header开头，这个header里包含了很多信息，其中�
 如果想要对ELF文件有详细的了解，欢迎选修体系实习，体验手动解析elf的快感：）
 
 
-### Exercise 7
+## Exercise 7
 
 
 - OS经常在非常高的地址空间运行，比如0xf0100000, 目的是为了让低的空间给用户使用。
@@ -108,7 +108,7 @@ __attribute__是用来对某一个结构体做一些限制的，而__aligned__�
 movl $0x0,%ebp
 ```
 
-### Exercise 8
+## Exercise 8
 
 修改代码如下：
 
@@ -214,7 +214,7 @@ He110 World
 
 没有想清楚
 
-### Exercise 9
+## Exercise 9
 
 **Determine where the kernel initializes its stack, and exactly where in memory its stack is located. How does the kernel reserve space for its stack? And at which "end" of this reserved area is the stack pointer initialized to point to?**
 
@@ -228,7 +228,7 @@ He110 World
 KSTKSIZE的大小在<inc/memlayout.h>里有定义，是8个page的大小。
 - 在顶部，栈是自顶向下增大的
 
-### Exercise 10
+## Exercise 10
 
 **How many 32-bit words does each recursive nesting level of test_backtrace push on the stack, and what are those words?**
 
@@ -257,7 +257,7 @@ f0100068:	83 c4 10             	add    $0x10,%esp
 f010006b:	eb 11                	jmp    f010007e <test_backtrace+0x3e>
 ```
 
-### Excercise 11
+## Excercise 11
 
 要求：修改mon_backtrace，打印出如下信息：
 
@@ -335,7 +335,7 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 
 
 
-### Exercise 12
+## Exercise 12
 
 要求：打印出函数更详细的信息：
 
@@ -412,7 +412,7 @@ static struct Command commands[] = {
 
 
 
-### Challenge
+## Challenge
 
 彩色界面！
 
