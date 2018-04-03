@@ -221,3 +221,31 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 
 	return 0;
 }
+
+
+int debuginfo_VMmapping(uintptr_t va, struct VMmappinginfo *info)
+{
+	pte_t * ptb = pgdir_walk(kern_pgdir, (void*)va, 0);
+	info->va = va;
+	if(ptb == NULL){
+		info->pa = 0;
+		info->perm = 0;
+		return 0;
+	}
+
+	uint32_t perm = *(ptb) & 0xfff;
+	physaddr_t pa = PTE_ADDR(*ptb);
+	info->pa = pa;
+	info->perm = perm;
+	return 0;
+}
+
+
+int debug_set_VMperm(uintptr_t va, int perm)
+{
+	pte_t * ptb = pgdir_walk(kern_pgdir, (void*)va, 0);
+	if(ptb == NULL)
+		return -1;
+	*ptb |= perm;
+	return 0;
+}

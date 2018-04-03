@@ -24,10 +24,158 @@ struct Command {
 static struct Command commands[] = {
 	{ "help", "Display this list of commands", mon_help },
 	{ "kerninfo", "Display information about the kernel", mon_kerninfo },
-	{ "backtrace", "trace back through stack to find debugging infomation", mon_backtrace}
+	{ "backtrace", "trace back through stack to find debugging infomation", mon_backtrace},
+	{ "showmappings", "show vm mapping", mon_VMmapping},
+	{ "sm", "show vm mapping", mon_VMmapping},
+	{ "setperm", "set permission", set_VMperm},
+	{ "dumpVM", "dump contents within a range of VM", dump_VM}
 };
 
 /***** Implementations of basic kernel monitor commands *****/
+
+int parse_0x(char *s_num)
+{
+	int res = 0;
+	char num;
+
+	cprintf("Parsing...\n");
+
+	char * ptr = s_num+2;
+	while((num=*(ptr++))!= '\0')
+	{
+		res = res * 16;
+		if(num>=48 && num<=57)
+			res += (num - '0');
+		else if(num>=65 && num <=70)
+			res += (num - 'A') + 10;
+		else if(num>=97 && num <=102)
+			res += (num - 'a') + 10;
+		else{
+			cprintf("wrong number format\n");
+			return -1;
+		}
+	}
+	return res;
+}
+
+int mon_VMmapping(int argc, char **argv, struct Trapframe *tf)
+{
+	if(argc != 3){
+		cprintf("wrong input format\n");
+		return -1;
+	}
+
+	uintptr_t v_s = 0, v_e = 0;
+	v_s = (uintptr_t)parse_0x(argv[1]);
+	v_e = (uintptr_t)parse_0x(argv[2]);
+
+	if(v_s == -1 || v_e == -1)
+	{
+		return -1;
+	}
+
+	cprintf("Trying to show mappings in vm range [0x%x, 0x%x]\n", v_s, v_e);
+
+	uintptr_t va = v_s;
+
+	for(;va<=v_e;va+=PGSIZE)
+	{
+		struct VMmappinginfo info;
+		debuginfo_VMmapping(va, &info);
+		cprintf("va:%x pa:%x perm:%d\n", (&info)->va, (&info)->pa, (&info)->perm);
+	}
+
+	return 0;
+}
+
+int set_VMperm(int argc, char **argv, struct Trapframe*tf)
+{
+	if(argc != 3)
+	{
+		cprintf("wrong input format\n");
+		return -1;
+	}
+
+	int perm = 0;
+	char p;
+	char * ptr = argv[1];
+
+	while((p = *(ptr++))!='\0'){
+		if(p == 'w')
+			perm |= PTE_W;
+		else if(p == 'u')
+			perm |= PTE_U;
+		else if(p == '!'){
+			p = *(ptr++);
+			if(p == 'w')
+				perm &= (~PTE_W);
+			else if(p == 'u')
+				perm &= (~PTE_U);
+		}
+	}
+
+	uintptr_t va = 0;
+	va = (uintptr_t)parse_0x(argv[2]);
+	
+	debug_set_VMperm(va, perm);
+
+	return 0;
+}
+
+
+int dump_VM(int argc, char **argv, struct Trapframe*tf)
+{
+	if(argc != 4){
+		cprintf("wrong input format\n");
+		return -1;
+	}
+
+	// dump physical address
+	if(argv[1][1] == 'p'){
+		physaddr_t p_s = 0, p_e = 0;
+		p_s = (physaddr_t)parse_0x(argv[2]);
+		p_e = (physaddr_t)parse_0x(argv[3]);
+
+		if(p_s == -1 || p_e == -1)
+		{
+			return -1;
+		}
+
+		physaddr_t pa = p_s;
+		for(;pa<=p_e;pa+=PGSIZE){
+			int i = 0;
+			char * content = (char*)page2kva(pa2page(pa));;
+			for(;i<=PGSIZE;i++){
+				cprintf("%c", content[i]);
+			}
+			cprintf("\n");
+		}
+	}
+
+	if(argv[1][1] == 'v'){
+		uintptr_t v_s = 0, v_e = 0;
+		v_s = (uintptr_t)parse_0x(argv[2]);
+		v_e = (uintptr_t)parse_0x(argv[3]);
+
+		if(v_s == -1 || v_e == -1)
+		{
+			return -1;
+		}
+
+		uintptr_t va = v_s;
+		for(;va<=v_e;va+=PGSIZE){
+			int i = 0;
+			char * content = (char*)va;
+			for(;i<=PGSIZE;i++){
+				cprintf("%c", content[i]);
+			}
+			cprintf("\n");
+		}
+	}
+
+	return 0;
+
+}
 
 int
 mon_help(int argc, char **argv, struct Trapframe *tf)
