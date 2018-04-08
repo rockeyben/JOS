@@ -38,7 +38,7 @@ int parse_0x(char *s_num)
 	int res = 0;
 	char num;
 
-	cprintf("Parsing...\n");
+	//cprintf("Parsing...\n");
 
 	char * ptr = s_num+2;
 	while((num=*(ptr++))!= '\0')
@@ -82,7 +82,15 @@ int mon_VMmapping(int argc, char **argv, struct Trapframe *tf)
 	{
 		struct VMmappinginfo info;
 		debuginfo_VMmapping(va, &info);
-		cprintf("va:%x pa:%x perm:%d\n", (&info)->va, (&info)->pa, (&info)->perm);
+		cprintf("va:%x pa:%x perm: ", (&info)->va, (&info)->pa);
+		int perm = (&info)->perm;
+		if((perm & PTE_W) != 0)
+			cprintf("PTE_W ");
+		if((perm & PTE_U) != 0)
+			cprintf("PTE_U ");
+		if((perm & PTE_P) != 0)
+			cprintf("PTE_P ");
+		cprintf("\n");
 	}
 
 	return 0;
@@ -146,7 +154,7 @@ int dump_VM(int argc, char **argv, struct Trapframe*tf)
 			int i = 0;
 			char * content = (char*)page2kva(pa2page(pa));;
 			for(;i<=PGSIZE;i++){
-				cprintf("%c", content[i]);
+				cprintf("%x\n", content[i]);
 			}
 			cprintf("\n");
 		}
@@ -167,7 +175,7 @@ int dump_VM(int argc, char **argv, struct Trapframe*tf)
 			int i = 0;
 			char * content = (char*)va;
 			for(;i<=PGSIZE;i++){
-				cprintf("%c", content[i]);
+				cprintf("%x\n", content[i]);
 			}
 			cprintf("\n");
 		}

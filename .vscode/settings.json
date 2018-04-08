@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "slist": "c",
+        "initializer_list": "c",
+        "pmap.h": "c",
+        "mmu.h": "c"
+    }
+}

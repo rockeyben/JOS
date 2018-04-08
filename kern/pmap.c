@@ -94,6 +94,7 @@ boot_alloc(uint32_t n)
 	// to any kernel code or global variables.
 	if (!nextfree) {
 		extern char end[];
+		// cprintf("end is : %x\n", end);
 		nextfree = ROUNDUP((char *) end, PGSIZE);
 	}
 
@@ -149,6 +150,7 @@ mem_init(void)
 
 	// Permissions: kernel R, user R
 	kern_pgdir[PDX(UVPT)] = PADDR(kern_pgdir) | PTE_U | PTE_P;
+	//cprintf("hahaha %x %x\n", PDX(kern_pgdir), PDX(ULIM));
 
 	//////////////////////////////////////////////////////////////////////
 	// Allocate an array of npages 'struct PageInfo's and store it in 'pages'.
@@ -182,9 +184,7 @@ mem_init(void)
 	//      (ie. perm = PTE_U | PTE_P)
 	//    - pages itself -- kernel RW, user NONE
 	// Your code goes here:
-
-	uint32_t nn = ROUNDUP(npages*sizeof(struct PageInfo), PGSIZE);
-	boot_map_region(kern_pgdir, UPAGES, nn, PADDR(pages), PTE_W | PTE_P);
+	boot_map_region(kern_pgdir, UPAGES,PTSIZE, PADDR(pages), PTE_U | PTE_P);
 	
 
 	//////////////////////////////////////////////////////////////////////
@@ -199,9 +199,7 @@ mem_init(void)
 	//     Permissions: kernel RW, user NONE
 	// Your code goes here:
 
-	boot_map_region(kern_pgdir, KSTACKTOP-KSTKSIZE, KSTKSIZE, PADDR(bootstack), PTE_W|PTE_P);
-
-
+	boot_map_region(kern_pgdir, KSTACKTOP-KSTKSIZE, KSTKSIZE, PADDR(bootstack), PTE_W |PTE_P);
 
 	//////////////////////////////////////////////////////////////////////
 	// Map all of physical memory at KERNBASE.
@@ -215,6 +213,8 @@ mem_init(void)
 	boot_map_region(kern_pgdir, KERNBASE, 1<<28, 0, PTE_W | PTE_P);
 	// Check that the initial page directory has been set up correctly.
 	check_kern_pgdir();
+
+	
 
 	// Switch from the minimal entry page directory to the full kern_pgdir
 	// page table we just created.	Our instruction pointer should be
@@ -368,6 +368,7 @@ pgdir_walk(pde_t *pgdir, const void *va, int create)
 	uintptr_t vaddr = (uintptr_t)va;
 	pde_t * pde = &pgdir[PDX(vaddr)];
 	pte_t * p;
+	// cprintf("test: %x %x\n",(int)pde << 10, *pde);
 	// the page don't exist
 	if(!(*pde & PTE_P)){
 		if(create == 0)
@@ -379,7 +380,7 @@ pgdir_walk(pde_t *pgdir, const void *va, int create)
 			}
 			page_addr->pp_ref ++;
 			*(pde) = page2pa(page_addr);
-			*pde |= PTE_W | PTE_P;
+			*pde |= PTE_W | PTE_P | PTE_U;
 			p = (pte_t*)KADDR(PTE_ADDR(*pde));
 			return p + PTX(vaddr);
 		}
