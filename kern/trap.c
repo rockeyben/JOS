@@ -67,6 +67,7 @@ trap_init(void)
 	extern struct Segdesc gdt[];
 
 	// LAB 3: Your code here.
+	/*
 	void t_divide();
 	void t_debug();
 	void t_nmi();
@@ -106,9 +107,20 @@ trap_init(void)
 	SETGATE(idt[18], 1, GD_KT, t_machine, 0);
 	SETGATE(idt[19], 1, GD_KT, t_simd_err, 0);
 	SETGATE(idt[48], 0, GD_KT, i_syscall, 3);
+	*/
 
 	// cprintf("bullding trap finished\n");
 
+	/*challenge code*/
+	extern void (*funs[])();
+	int i;
+	for (i = 0; i <= 19; ++i)
+		if (i==T_BRKPT)
+			SETGATE(idt[i], 1, GD_KT, funs[i], 3)
+		else if (i!=9 && i!=15) {
+			SETGATE(idt[i], 1, GD_KT, funs[i], 0);
+		}
+	SETGATE(idt[48], 0, GD_KT, funs[48], 3);
 
 	// Per-CPU setup 
 	trap_init_percpu();

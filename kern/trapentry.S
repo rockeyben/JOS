@@ -41,12 +41,74 @@
 	pushl $(num);							\
 	jmp _alltraps
 
+#define EC(name, num)\
+.data;\
+	.long name;\
+.text;\
+	.global name;\
+	.type name, @function;\
+	.align 2;\
+	name:\
+	pushl $(num);\
+	jmp _alltraps
+
+#define NOEC(name, num)\
+.data;\
+	.long name;\
+.text;\
+	.global name;\
+	.type name, @function;\
+	.align 2;\
+	name:\
+	push $0;\
+	pushl $(num);\
+	jmp _alltraps
+
+#define haha()\
+.data;\
+	.long 0
+
+.data
+	.p2align 2
+	.globl funs
+
+funs:
+
 .text
+
+/*challenge here*/
+
+	NOEC(t_divide, 0)
+	NOEC(t_debug, 1)
+	EC(t_nmi, 2)
+	NOEC(t_breakpoint, 3)
+	NOEC(t_overflow, 4)
+	NOEC(t_bound_check, 5)
+	NOEC(t_illegal_op, 6)
+	NOEC(t_device, 7)
+	EC(t_double_fault, 8)
+	haha()
+	EC(t_tss, 10)
+	EC(t_segment_not_present, 11)
+	EC(t_stack, 12)
+	EC(t_gp_fault, 13)
+	EC(t_pg_fault, 14)
+	haha()
+	EC(t_fp_err, 16)
+	EC(t_align, 17)
+	EC(t_machine, 18)
+	EC(t_simd_err, 19)
+.data
+	.space 112
+.text
+	NOEC(i_syscall, 48)
+
+
 
 /*
  * Lab 3: Your code here for generating entry points for the different traps.
  */
-
+/*
 	TRAPHANDLER_NOEC(t_divide, 0)
 	TRAPHANDLER_NOEC(t_debug, 1)
 	TRAPHANDLER(t_nmi, 2)
@@ -66,6 +128,7 @@
 	TRAPHANDLER(t_machine, 18)
 	TRAPHANDLER(t_simd_err, 19)
 	TRAPHANDLER_NOEC(i_syscall, 48)
+*/
 
 /*
  * Lab 3: Your code here for _alltraps
