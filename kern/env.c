@@ -372,7 +372,6 @@ load_icode(struct Env *e, uint8_t *binary)
 
 	// LAB 3: Your code here.
 	e->env_tf.tf_eip = hdr->e_entry;
-	//cprintf("%x\n", hdr->e_entry);
 	region_alloc(e, (void *) (USTACKTOP - PGSIZE), PGSIZE);
 }
 
@@ -513,22 +512,6 @@ env_run(struct Env *e)
 		if(curenv->env_status == ENV_RUNNING)
 			curenv->env_status = ENV_RUNNABLE;
 	}
-
-	/*
-	asm volatile("\tget_eip: movl %%eax, %%esp\n"
-				"\tret\n"
-				"\tcall get_eip\n"
-				"\tmovl %0, %%eax\n"
-				 : "=r" (e->env_tf.tf_eip));
-	asm volatile("movl %%esp,%0" : "=r" (e->env_tf.tf_esp));
-	asm volatile("movl %%eflags,%0" : "=r" (e->env_tf.tf_eflags));
-	asm volatile("movl %%cs,%0" : "=r" (e->env_tf.tf_cs));
-	asm volatile("movl %%ss,%0" : "=r" (e->env_tf.tf_ss));
-	asm volatile("movl %%ds,%0" : "=r" (e->env_tf.tf_ds));
-	asm volatile("movl %%es,%0" : "=r" (e->env_tf.tf_es));
-	*/
-
-
 	curenv = e;
 	e->env_status = ENV_RUNNING;
 	e->env_runs ++;
