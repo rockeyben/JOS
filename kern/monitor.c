@@ -185,6 +185,8 @@ mon_help(int argc, char **argv, struct Trapframe *tf)
 
 	for (i = 0; i < ARRAY_SIZE(commands); i++)
 		cprintf("%s - %s\n", commands[i].name, commands[i].desc);
+
+	//cprintf("%s\n", 0x12345678);
 	return 0;
 }
 
