@@ -205,6 +205,23 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 	//	which one.
 	// Your code here.
 
+	int findit = -1;
+	for(int ii=lline; ii <= rline; ii++)
+	{
+		if(stabs[ii].n_type == 0x44)
+		{
+			if(stabs[ii].n_value <= addr && stabs[ii+1].n_value > addr)
+			{
+				info->eip_line = stabs[ii].n_desc;
+				findit = 0;
+			}
+		}
+	}
+
+	if(findit == -1)
+	{
+		return -1;
+	}
 
 	// Search backwards from the line number for the relevant filename
 	// stab.
@@ -227,5 +244,33 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 		     lline++)
 			info->eip_fn_narg++;
 
+	return 0;
+}
+
+
+int debuginfo_VMmapping(uintptr_t va, struct VMmappinginfo *info)
+{
+	pte_t * ptb = pgdir_walk(kern_pgdir, (void*)va, 0);
+	info->va = va;
+	if(ptb == NULL){
+		info->pa = 0;
+		info->perm = 0;
+		return 0;
+	}
+
+	uint32_t perm = *(ptb) & 0xfff;
+	physaddr_t pa = PTE_ADDR(*ptb);
+	info->pa = pa;
+	info->perm = perm;
+	return 0;
+}
+
+
+int debug_set_VMperm(uintptr_t va, int perm)
+{
+	pte_t * ptb = pgdir_walk(kern_pgdir, (void*)va, 0);
+	if(ptb == NULL)
+		return -1;
+	*ptb |= perm;
 	return 0;
 }
