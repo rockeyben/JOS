@@ -231,13 +231,9 @@ mem_init(void)
 	// Permissions: kernel RW, user NONE
 	// Your code goes here:
 
-<<<<<<< HEAD
 	// Initialize the SMP-related parts of the memory map
 	mem_init_mp();
 
-=======
-	boot_map_region(kern_pgdir, KERNBASE, 1<<28, 0, PTE_W | PTE_P);
->>>>>>> lab3
 	// Check that the initial page directory has been set up correctly.
 	check_kern_pgdir();
 
@@ -868,7 +864,6 @@ check_kern_pgdir(void)
 		assert(check_va2pa(pgdir, KERNBASE + i) == i);
 
 	// check kernel stack
-<<<<<<< HEAD
 	// (updated in lab 4 to check per-CPU kernel stacks)
 	for (n = 0; n < NCPU; n++) {
 		uint32_t base = KSTACKTOP - (KSTKSIZE + KSTKGAP) * (n + 1);
@@ -879,11 +874,7 @@ check_kern_pgdir(void)
 			assert(check_va2pa(pgdir, base + i) == ~0);
 	}
 
-=======
-	for (i = 0; i < KSTKSIZE; i += PGSIZE)
-		assert(check_va2pa(pgdir, KSTACKTOP - KSTKSIZE + i) == PADDR(bootstack) + i);
-	assert(check_va2pa(pgdir, KSTACKTOP - PTSIZE) == ~0);
->>>>>>> lab3
+
 	// check PDE permissions
 	for (i = 0; i < NPDENTRIES; i++) {
 		switch (i) {
