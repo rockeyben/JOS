@@ -231,6 +231,8 @@ mem_init(void)
 	// Permissions: kernel RW, user NONE
 	// Your code goes here:
 
+	boot_map_region(kern_pgdir, KERNBASE, -KERNBASE, 0, PTE_W|PTE_U);
+
 	// Initialize the SMP-related parts of the memory map
 	mem_init_mp();
 
@@ -281,6 +283,13 @@ mem_init_mp(void)
 	//     Permissions: kernel RW, user NONE
 	//
 	// LAB 4: Your code here:
+	int i = 0;
+	for(i = 0; i < NCPU; i++){
+		uintptr_t kstacktop_i = KSTACKTOP - i * (KSTKSIZE + KSTKGAP);
+		//cprintf("%x\n", percpu_kstacks[i]);
+		boot_map_region(kern_pgdir, kstacktop_i - KSTKSIZE, KSTKSIZE,
+			PADDR(percpu_kstacks[i]), PTE_W|PTE_P);
+	}
 
 }
 
@@ -326,7 +335,7 @@ page_init(void)
 		pages[i].pp_ref = 0;
 		pages[i].pp_link = page_free_list;
 		// 4MB, which is mentioned in ;entry.S'
-		if( i == 0 || (i >= IOPHYSMEM/PGSIZE && i < 1024)){
+		if( i == 0 || (i >= IOPHYSMEM/PGSIZE && i < 1024) || i == MPENTRY_PADDR/PGSIZE){
 			continue;
 		}
 		page_free_list = &pages[i];
@@ -439,6 +448,7 @@ pgdir_walk(pde_t *pgdir, const void *va, int create)
 	else{
 		p = (pte_t*)KADDR(PTE_ADDR(*pde)) + PTX(vaddr);
 		*pde |= *p & 0xfff;
+		//cprintf("return %x\n",p);
 		return p;
 	}
 }
@@ -624,7 +634,15 @@ mmio_map_region(physaddr_t pa, size_t size)
 	// Hint: The staff solution uses boot_map_region.
 	//
 	// Your code here:
-	panic("mmio_map_region not implemented");
+	
+	size = ROUNDUP(size, PGSIZE);
+	if(base+size > MMIOLIM){
+		panic("mmio overflow!");
+	}
+	boot_map_region(kern_pgdir, base, size, pa, PTE_W | PTE_PCD | PTE_PWT | PTE_P);
+	base = base + size;
+	return (void*)(base - size);
+	//panic("mmio_map_region not implemented");
 }
 
 static uintptr_t user_mem_check_addr;
@@ -651,14 +669,16 @@ int
 user_mem_check(struct Env *env, const void *va, size_t len, int perm)
 {
 	// LAB 3: Your code here.
-
 	uintptr_t v_s = (uintptr_t)ROUNDDOWN(va, PGSIZE);
 	uintptr_t v_e = (uintptr_t)ROUNDUP(va+len, PGSIZE);
 	perm = perm | PTE_P;
-	//cprintf("check addr: %x len: %d\n", va, len);
+	//cprintf("check addr: %x %x len: %d\n", v_s, v_e, len);
 	for(; v_s<v_e; v_s+=PGSIZE){
 		pte_t * ptb = pgdir_walk(env->env_pgdir, (void*)v_s, 0);
-		//cprintf("checking: %x %x %x %x\n", v_s, *ptb & 0xfff, perm, *ptb & perm);
+		if(!ptb){
+			user_mem_check_addr = v_s >= (uintptr_t)va ? v_s : (uintptr_t)va;
+			return -E_FAULT;
+		}
 		if((*ptb & perm) == perm && v_s < ULIM){
 			continue;
 		}
@@ -667,7 +687,6 @@ user_mem_check(struct Env *env, const void *va, size_t len, int perm)
 			return -E_FAULT;
 		}
 	}
-
 	return 0;
 }
 
@@ -1062,6 +1081,7 @@ check_page(void)
 	// test mmio_map_region
 	mm1 = (uintptr_t) mmio_map_region(0, 4097);
 	mm2 = (uintptr_t) mmio_map_region(0, 4096);
+
 	// check that they're in the right region
 	assert(mm1 >= MMIOBASE && mm1 + 8096 < MMIOLIM);
 	assert(mm2 >= MMIOBASE && mm2 + 8096 < MMIOLIM);

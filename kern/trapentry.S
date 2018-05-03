@@ -100,9 +100,29 @@ funs:
 	EC(t_machine, 18)
 	EC(t_simd_err, 19)
 .data
-	.space 112
+	.space 48
 .text
+	NOEC(i_timer, IRQ_TIMER+IRQ_OFFSET)
+	NOEC(i_kbd, IRQ_KBD+IRQ_OFFSET)
+	haha()
+	haha()
+	NOEC(i_serial, IRQ_SERIAL+IRQ_OFFSET)
+	haha()
+	haha()
+	NOEC(i_spurious, IRQ_SPURIOUS+IRQ_OFFSET)
+	haha()
+	haha()
+	haha()
+	haha()
+	haha()
+	haha()			
+	NOEC(i_ide, IRQ_IDE+IRQ_OFFSET)
+	haha()
 	NOEC(i_syscall, 48)
+	haha()
+	haha()				
+	NOEC(i_error, IRQ_ERROR+IRQ_OFFSET)
+	
 
 
 
@@ -130,6 +150,7 @@ funs:
 	TRAPHANDLER(t_simd_err, 19)
 	TRAPHANDLER_NOEC(i_syscall, 48)
 */
+
 
 /*
  * Lab 3: Your code here for _alltraps

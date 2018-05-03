@@ -82,7 +82,7 @@ envid2env(envid_t envid, struct Env **env_store, bool checkperm)
 		*env_store = curenv;
 		return 0;
 	}
-
+	//cprintf("here\n");
 	// Look up the Env structure via the index part of the envid,
 	// then check the env_id field in that struct Env
 	// to ensure that the envid is not stale
@@ -91,6 +91,7 @@ envid2env(envid_t envid, struct Env **env_store, bool checkperm)
 	e = &envs[ENVX(envid)];
 	if (e->env_status == ENV_FREE || e->env_id != envid) {
 		*env_store = 0;
+		cprintf("no env %x\n", e->env_status);
 		return -E_BAD_ENV;
 	}
 
@@ -99,8 +100,10 @@ envid2env(envid_t envid, struct Env **env_store, bool checkperm)
 	// If checkperm is set, the specified environment
 	// must be either the current environment
 	// or an immediate child of the current environment.
+	
 	if (checkperm && e != curenv && e->env_parent_id != curenv->env_id) {
 		*env_store = 0;
+		cprintf("perm wrong\n");
 		return -E_BAD_ENV;
 	}
 
@@ -264,6 +267,9 @@ env_alloc(struct Env **newenv_store, envid_t parent_id)
 
 	// Enable interrupts while in user mode.
 	// LAB 4: Your code here.
+	e->env_tf.tf_eflags |= FL_IF;
+	//cprintf("the eflags now is  %x\n", e->env_tf.tf_eflags);
+	
 
 	// Clear the page fault handler until user installs one.
 	e->env_pgfault_upcall = 0;
@@ -542,6 +548,7 @@ env_run(struct Env *e)
 	e->env_status = ENV_RUNNING;
 	e->env_runs ++;
 	lcr3(PADDR(e->env_pgdir));
+	unlock_kernel();
 	env_pop_tf(&e->env_tf);
 	//panic("env_run not yet implemented");
 }

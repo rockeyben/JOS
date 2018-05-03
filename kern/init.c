@@ -63,17 +63,23 @@ i386_init(void)
 	// Acquire the big kernel lock before waking up APs
 	// Your code here:
 
+	lock_kernel();
+
 	// Starting non-boot CPUs
 	boot_aps();
-
+	//unlock_kernel();
+	//cprintf("boot aps finished\n");
 #if defined(TEST)
 	// Don't touch -- used by grading script!
 	ENV_CREATE(TEST, ENV_TYPE_USER);
 #else
 	// Touch all you want.
-	ENV_CREATE(user_primes, ENV_TYPE_USER);
+	//ENV_CREATE(user_primes, ENV_TYPE_USER);
+	ENV_CREATE(user_yield, ENV_TYPE_USER);
+	ENV_CREATE(user_yield, ENV_TYPE_USER);
+	ENV_CREATE(user_yield, ENV_TYPE_USER);
+	//cprintf("env create finished\n");
 #endif // TEST*
-
 	// Schedule and run the first user environment!
 	sched_yield();
 }
@@ -128,9 +134,10 @@ mp_main(void)
 	// only one CPU can enter the scheduler at a time!
 	//
 	// Your code here:
+	lock_kernel();
+	sched_yield();
+	//unlock_kernel();
 
-	// Remove this after you finish Exercise 6
-	for (;;);
 }
 
 /*
