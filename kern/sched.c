@@ -39,6 +39,8 @@ sched_yield(void)
 	}
 	//cprintf("envs: %x\n",envs);
 
+	/*
+	lab 4 code
 	for(i; i < NENV; i++){
 		if(idle == envs + NENV)
 			idle -= NENV;
@@ -48,15 +50,37 @@ sched_yield(void)
 		}
 		idle += 1;
 	}
-
-	//cprintf("no, so choose current %x\n", curenv);
-	//if(curenv != NULL){
+	
 
 	if(curenv && curenv->env_status == ENV_RUNNING){
 		env_run(curenv);
 		return ;
 	}
-	//}
+	*/
+
+
+	// challenge
+	struct Env * picked_env = NULL;
+	for(i; i < NENV; i++){
+		if(idle == envs + NENV)
+			idle -= NENV;
+		if(idle->env_status == ENV_RUNNABLE){
+			if(picked_env == NULL || idle->priority < picked_env->priority)
+				picked_env = idle;
+		}
+		idle += 1;
+	}
+	
+	// if haven't found a env, or curenv have higher priority than picked env, just run the curenv
+	if(curenv && curenv->env_status == ENV_RUNNING && 
+		((picked_env==NULL || curenv->priority < picked_env->priority))){
+		env_run(curenv);
+	}
+
+	if(picked_env){
+		env_run(picked_env);
+	}
+	
 
 	// sched_halt never returns
 	sched_halt();

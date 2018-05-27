@@ -151,6 +151,49 @@ fork(void)
 	// panic("fork not implemented");
 }
 
+// challenge
+envid_t pr_fork(int priority)
+{	
+	int r;
+
+	set_pgfault_handler(pgfault);
+
+	envid_t envid;
+	uint32_t addr;
+	extern unsigned char end[];
+	envid = sys_exofork();
+
+	if(envid < 0){
+		panic("sys_exofork: %e", envid);
+	}
+	else if(envid == 0){
+		// child
+		thisenv = &envs[ENVX(sys_getenvid())];
+		sys_change_priority(priority);
+		//cprintf("child finished\n");
+		return 0;
+	}
+
+	for (addr = 0; addr < UTOP; addr += PGSIZE){
+		// don't copy user exception stack 
+		if(addr>= USTACKTOP && addr < UXSTACKTOP)
+			continue;
+		if((uvpd[PDX(addr)]&PTE_P) && (uvpt[PGNUM(addr)]&PTE_P) && (uvpt[PGNUM(addr)]&PTE_U))
+			duppage(envid, PGNUM(addr));
+	}
+
+	sys_page_alloc(envid, (void *)(UXSTACKTOP-PGSIZE), PTE_U|PTE_W|PTE_P);
+	extern void _pgfault_upcall();
+	sys_env_set_pgfault_upcall(envid, _pgfault_upcall);
+	// Start the child environment running
+	if ((r = sys_env_set_status(envid, ENV_RUNNABLE)) < 0)
+		panic("sys_env_set_status: %e", r);
+	return envid;
+	
+	// panic("fork not implemented");
+
+}
+
 // Challenge!
 int
 sfork(void)
