@@ -18,6 +18,18 @@
 static void boot_aps(void);
 
 
+// Test the stack backtrace function (lab 1 only)
+void
+test_backtrace(int x)
+{
+	cprintf("entering test_backtrace %d\n", x);
+	if (x > 0)
+		test_backtrace(x-1);
+	else
+		mon_backtrace(0, 0, 0);
+	cprintf("leaving test_backtrace %d\n", x);
+}
+
 void
 i386_init(void)
 {
@@ -50,6 +62,8 @@ i386_init(void)
 
 	// Acquire the big kernel lock before waking up APs
 	// Your code here:
+
+	lock_kernel();
 
 	// Starting non-boot CPUs
 	boot_aps();
@@ -122,9 +136,10 @@ mp_main(void)
 	// only one CPU can enter the scheduler at a time!
 	//
 	// Your code here:
+	lock_kernel();
+	sched_yield();
+	//unlock_kernel();
 
-	// Remove this after you finish Exercise 6
-	for (;;);
 }
 
 /*

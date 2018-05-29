@@ -29,9 +29,62 @@ sched_yield(void)
 	// below to halt the cpu.
 
 	// LAB 4: Your code here.
+	int i = 0;
+
+	if(curenv){
+		idle = curenv;
+	}
+	else{
+		idle = envs;
+	}
+	//cprintf("envs: %x\n",envs);
+
+	/*
+	lab 4 code
+	for(i; i < NENV; i++){
+		if(idle == envs + NENV)
+			idle -= NENV;
+		if(idle->env_status == ENV_RUNNABLE){
+			//cprintf("find one %x %d %d\n", idle, idle -envs,  NENV);
+			env_run(idle);
+		}
+		idle += 1;
+	}
+	
+
+	if(curenv && curenv->env_status == ENV_RUNNING){
+		env_run(curenv);
+		return ;
+	}
+	*/
+
+
+	// challenge
+	struct Env * picked_env = NULL;
+	for(i; i < NENV; i++){
+		if(idle == envs + NENV)
+			idle -= NENV;
+		if(idle->env_status == ENV_RUNNABLE){
+			if(picked_env == NULL || idle->priority < picked_env->priority)
+				picked_env = idle;
+		}
+		idle += 1;
+	}
+	
+	// if haven't found a env, or curenv have higher priority than picked env, just run the curenv
+	if(curenv && curenv->env_status == ENV_RUNNING && 
+		((picked_env==NULL || curenv->priority < picked_env->priority))){
+		env_run(curenv);
+	}
+
+	if(picked_env){
+		env_run(picked_env);
+	}
+	
 
 	// sched_halt never returns
 	sched_halt();
+	
 }
 
 // Halt this CPU when there is nothing to do. Wait until the
@@ -75,7 +128,7 @@ sched_halt(void)
 		"pushl $0\n"
 		"pushl $0\n"
 		// Uncomment the following line after completing exercise 13
-		//"sti\n"
+		"sti\n"
 		"1:\n"
 		"hlt\n"
 		"jmp 1b\n"

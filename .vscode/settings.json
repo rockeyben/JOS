@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "lib.h": "c",
+        "syscall.h": "c",
+        "thread": "c",
+        "exception": "c"
+    }
+}
