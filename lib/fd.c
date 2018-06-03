@@ -1,6 +1,6 @@
 #include <inc/lib.h>
 
-#define debug		0
+#define debug		1
 
 // Maximum number of file descriptors a program may hold open concurrently
 #define MAXFD		32
@@ -81,6 +81,7 @@ fd_lookup(int fdnum, struct Fd **fd_store)
 		return -E_INVAL;
 	}
 	fd = INDEX2FD(fdnum);
+	//cprintf("%x \n", fd);
 	if (!(uvpd[PDX(fd)] & PTE_P) || !(uvpt[PGNUM(fd)] & PTE_P)) {
 		if (debug)
 			cprintf("[%08x] closed fd %d\n", thisenv->env_id, fdnum);
@@ -112,9 +113,11 @@ fd_close(struct Fd *fd, bool must_exist)
 		else
 			r = 0;
 	}
+	cprintf("fd clode %e %x\n", r, fd);
 	// Make sure fd is unmapped.  Might be a no-op if
 	// (*dev->dev_close)(fd) already unmapped it.
 	(void) sys_page_unmap(0, fd);
+	cprintf("sys unmap finish \n");
 	return r;
 }
 
@@ -150,8 +153,9 @@ close(int fdnum)
 {
 	struct Fd *fd;
 	int r;
-
-	if ((r = fd_lookup(fdnum, &fd)) < 0)
+	r = fd_lookup(fdnum, &fd);
+	cprintf("close heres %d\n", r);
+	if (r < 0)
 		return r;
 	else
 		return fd_close(fd, 1);
@@ -241,9 +245,14 @@ write(int fdnum, const void *buf, size_t n)
 	struct Dev *dev;
 	struct Fd *fd;
 
+	//cprintf("write here1\n");
+	//cprintf("%d\n", fdnum);
+	r = fd_lookup(fdnum, &fd);
+	//cprintf("r %d\n", r);
 	if ((r = fd_lookup(fdnum, &fd)) < 0
 	    || (r = dev_lookup(fd->fd_dev_id, &dev)) < 0)
 		return r;
+	
 	if ((fd->fd_omode & O_ACCMODE) == O_RDONLY) {
 		cprintf("[%08x] write %d -- bad mode\n", thisenv->env_id, fdnum);
 		return -E_INVAL;
@@ -253,6 +262,8 @@ write(int fdnum, const void *buf, size_t n)
 			fdnum, buf, n, dev->dev_name);
 	if (!dev->dev_write)
 		return -E_NOT_SUPP;
+	
+	//cprintf("try to dev write\n");
 	return (*dev->dev_write)(fd, buf, n);
 }
 

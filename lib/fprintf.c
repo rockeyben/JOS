@@ -17,8 +17,10 @@ struct printbuf {
 static void
 writebuf(struct printbuf *b)
 {
+	//cprintf("try to write buf\n");
 	if (b->error > 0) {
 		ssize_t result = write(b->fd, b->buf, b->idx);
+		//cprintf("after write\n");
 		if (result > 0)
 			b->result += result;
 		if (result != b->idx) // error, or wrote less than supplied

@@ -39,8 +39,8 @@ sched_yield(void)
 	}
 	//cprintf("envs: %x\n",envs);
 
-	/*
-	lab 4 code
+	
+	//lab 4 code
 	for(i; i < NENV; i++){
 		if(idle == envs + NENV)
 			idle -= NENV;
@@ -56,10 +56,10 @@ sched_yield(void)
 		env_run(curenv);
 		return ;
 	}
-	*/
 
 
 	// challenge
+	/*
 	struct Env * picked_env = NULL;
 	for(i; i < NENV; i++){
 		if(idle == envs + NENV)
@@ -79,7 +79,7 @@ sched_yield(void)
 
 	if(picked_env){
 		env_run(picked_env);
-	}
+	}*/
 	
 
 	// sched_halt never returns

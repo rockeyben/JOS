@@ -73,6 +73,13 @@ duppage(envid_t envid, unsigned pn)
 	void*addr = (void*)(pn*PGSIZE);
 
 	r = 0;
+
+	if((uvpt[pn] & PTE_SHARE)){
+		r = sys_page_map(0, addr, envid, addr, uvpt[pn]&PTE_SYSCALL);
+		if (r < 0)
+			return r;
+		return 0;
+	}
 	
 	if(((uvpt[pn] & PTE_W)) || ((uvpt[pn] & PTE_COW))){
 		r = sys_page_map(0, addr, envid, addr, PTE_COW|PTE_U|PTE_P);
@@ -132,7 +139,7 @@ fork(void)
 		return 0;
 	}
 
-	for (addr = 0; addr < UTOP; addr += PGSIZE){
+	for (addr = UTEXT; addr < USTACKTOP; addr += PGSIZE){
 		// don't copy user exception stack 
 		if(addr>= USTACKTOP && addr < UXSTACKTOP)
 			continue;

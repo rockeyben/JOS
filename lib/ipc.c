@@ -31,19 +31,19 @@ ipc_recv(envid_t *from_env_store, void *pg, int *perm_store)
 	else
 		err = sys_ipc_recv(pg);
 	
+	
 	if(err == 0){
 		if(from_env_store)
 			*from_env_store = thisenv->env_ipc_from;
 		if(perm_store)
-			*from_env_store = thisenv->env_ipc_perm;
-		
+			*perm_store = thisenv->env_ipc_perm;
 		return thisenv->env_ipc_value;
 	}
 	else {
 		if(from_env_store)
 			*from_env_store = 0;
 		if(perm_store)
-			*from_env_store = 0;
+			*perm_store = 0;
 		return err;
 	}
 

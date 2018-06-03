@@ -55,7 +55,18 @@ again:
 			// then close the original 'fd'.
 
 			// LAB 5: Your code here.
-			panic("< redirection not implemented");
+			//panic("< redirection not implemented");
+			
+			if ((fd = open(t, O_RDONLY)) < 0){
+				cprintf("open %s for input: %e", t, fd);
+				exit();
+			}
+
+			if (fd != 0){
+				dup(fd, 0);
+				close(fd);
+			}
+			
 			break;
 
 		case '>':	// Output redirection
@@ -75,6 +86,7 @@ again:
 			break;
 
 		case '|':	// Pipe
+			cprintf("piping\n");
 			if ((r = pipe(p)) < 0) {
 				cprintf("pipe: %e", r);
 				exit();
@@ -85,20 +97,28 @@ again:
 				cprintf("fork: %e", r);
 				exit();
 			}
+			cprintf("pip here %d\n", r);
 			if (r == 0) {
 				if (p[0] != 0) {
+					cprintf("try to dup 0\n");
 					dup(p[0], 0);
+					cprintf("dup 0 finish\n");
 					close(p[0]);
 				}
 				close(p[1]);
+				cprintf("again\n");
 				goto again;
 			} else {
 				pipe_child = r;
 				if (p[1] != 1) {
+					cprintf("try to dup\n");
 					dup(p[1], 1);
+					cprintf("dup finish\n");
 					close(p[1]);
+					cprintf("close finish\n");
 				}
 				close(p[0]);
+				cprintf("goto runit\n");
 				goto runit;
 			}
 			panic("| not implemented");
@@ -261,6 +281,7 @@ umain(int argc, char **argv)
 {
 	int r, interactive, echocmds;
 	struct Argstate args;
+	cprintf("sh here\n");
 
 	interactive = '?';
 	echocmds = 0;
@@ -280,6 +301,8 @@ umain(int argc, char **argv)
 			usage();
 		}
 
+	cprintf("sh here1\n");
+
 	if (argc > 2)
 		usage();
 	if (argc == 2) {
@@ -290,6 +313,8 @@ umain(int argc, char **argv)
 	}
 	if (interactive == '?')
 		interactive = iscons(0);
+	
+	cprintf("sh here2\n");
 
 	while (1) {
 		char *buf;

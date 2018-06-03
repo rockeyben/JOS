@@ -267,6 +267,12 @@ trap_dispatch(struct Trapframe *tf)
 			tf->tf_regs.reg_eax = syscall(tf->tf_regs.reg_eax, tf->tf_regs.reg_edx, tf->tf_regs.reg_ecx, 
 				tf->tf_regs.reg_ebx, tf->tf_regs.reg_edi, tf->tf_regs.reg_esi);
 			return; break;
+		case IRQ_KBD + IRQ_OFFSET:
+			kbd_intr();
+			return ;
+		case IRQ_SERIAL + IRQ_OFFSET:
+			serial_intr();
+			return;
 		default: break;
 	}
 	
@@ -355,11 +361,11 @@ page_fault_handler(struct Trapframe *tf)
 
 	// Read processor's CR2 register to find the faulting address
 	fault_va = rcr2();
-	//cprintf("The fault va is: %x\n", fault_va);
+	cprintf("The fault va is : %x eip is %x\n", fault_va, tf->tf_eip);
 	// Handle kernel-mode page faults.
 
 	// LAB 3: Your code here.
-	if(tf->tf_cs == GD_KT)
+	if((tf->tf_cs & 3) == 0)
 		panic("kernel mode page");
 
 	// We've already handled kernel-mode exceptions, so if we get here,

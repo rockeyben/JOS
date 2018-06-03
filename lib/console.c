@@ -98,6 +98,7 @@ devcons_write(struct Fd *fd, const void *vbuf, size_t n)
 {
 	int tot, m;
 	char buf[128];
+	cprintf("dev cons write\n");
 
 	// mistake: have to nul-terminate arg to sys_cputs,
 	// so we have to copy vbuf into buf in chunks and nul-terminate.
