@@ -136,8 +136,6 @@ mp_main(void)
 	// Your code here:
 	lock_kernel();
 	sched_yield();
-	//unlock_kernel();
-
 }
 
 /*
