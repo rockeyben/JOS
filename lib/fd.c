@@ -1,6 +1,6 @@
 #include <inc/lib.h>
 
-#define debug		1
+#define debug		0
 
 // Maximum number of file descriptors a program may hold open concurrently
 #define MAXFD		32
@@ -113,9 +113,10 @@ fd_close(struct Fd *fd, bool must_exist)
 		else
 			r = 0;
 	}
-	cprintf("fd clode %e %x\n", r, fd);
+	//cprintf("fd clode %e %x\n", r, fd);
 	// Make sure fd is unmapped.  Might be a no-op if
 	// (*dev->dev_close)(fd) already unmapped it.
+	cprintf("try to sys unmap\n");
 	(void) sys_page_unmap(0, fd);
 	cprintf("sys unmap finish \n");
 	return r;
@@ -154,7 +155,7 @@ close(int fdnum)
 	struct Fd *fd;
 	int r;
 	r = fd_lookup(fdnum, &fd);
-	cprintf("close heres %d\n", r);
+	// cprintf("close heres %d\n", r);
 	if (r < 0)
 		return r;
 	else
@@ -201,6 +202,7 @@ dup(int oldfdnum, int newfdnum)
 err:
 	sys_page_unmap(0, newfd);
 	sys_page_unmap(0, nva);
+	cprintf("dup err !!!!!!!!!!!!!!!!!!!!\n");
 	return r;
 }
 

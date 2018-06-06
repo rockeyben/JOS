@@ -86,7 +86,6 @@ again:
 			break;
 
 		case '|':	// Pipe
-			cprintf("piping\n");
 			if ((r = pipe(p)) < 0) {
 				cprintf("pipe: %e", r);
 				exit();
@@ -97,28 +96,28 @@ again:
 				cprintf("fork: %e", r);
 				exit();
 			}
-			cprintf("pip here %d\n", r);
+			//cprintf("pip here %d\n", r);
 			if (r == 0) {
 				if (p[0] != 0) {
-					cprintf("try to dup 0\n");
+					//cprintf("try to dup 0\n");
 					dup(p[0], 0);
-					cprintf("dup 0 finish\n");
+					//cprintf("dup 0 finish\n");
 					close(p[0]);
 				}
 				close(p[1]);
-				cprintf("again\n");
+				//cprintf("again\n");
 				goto again;
 			} else {
 				pipe_child = r;
 				if (p[1] != 1) {
-					cprintf("try to dup\n");
+					//cprintf("try to dup\n");
 					dup(p[1], 1);
-					cprintf("dup finish\n");
+					//cprintf("dup finish\n");
 					close(p[1]);
-					cprintf("close finish\n");
+					//cprintf("close finish\n");
 				}
 				close(p[0]);
-				cprintf("goto runit\n");
+				//cprintf("goto runit\n");
 				goto runit;
 			}
 			panic("| not implemented");

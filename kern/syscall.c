@@ -152,7 +152,7 @@ sys_env_set_trapframe(envid_t envid, struct Trapframe *tf)
 	if (err < 0)
 		return -E_BAD_ENV;
 	
-	user_mem_assert(e, (void*)tf, 1, PTE_U);
+	user_mem_assert(e, (void*)tf, sizeof(struct Trapframe), PTE_U);
 	
 	e->env_tf = *tf;
 	e->env_tf.tf_cs |= 3;
@@ -345,7 +345,7 @@ sys_page_unmap(envid_t envid, void *va)
 	if((unsigned)va >= UTOP || va != ROUNDUP(va, PGSIZE))
 		return -E_INVAL;
 	
-	//cprintf("try to unmap %x\n", va);
+	cprintf("try to unmap %x\n", va);
 	
 	page_remove(e->env_pgdir, va);
 	//cprintf("unmap finish %x\n", va);

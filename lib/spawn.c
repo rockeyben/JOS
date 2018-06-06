@@ -125,13 +125,13 @@ spawn(const char *prog, const char **argv)
 	close(fd);
 	fd = -1;
 
-	cprintf("spawn exec here\n");
+	//cprintf("spawn exec here\n");
 
 	// Copy shared library state.
 	if ((r = copy_shared_pages(child)) < 0)
 		panic("copy_shared_pages: %e", r);
 
-	cprintf("spawn finish copy share pages\n");
+	//cprintf("spawn finish copy share pages\n");
 
 	child_tf.tf_eflags |= FL_IOPL_3;   // devious: see user/faultio.c
 	if ((r = sys_env_set_trapframe(child, &child_tf)) < 0)
@@ -177,7 +177,7 @@ spawnl(const char *prog, const char *arg0, ...)
 		argv[i+1] = va_arg(vl, const char *);
 	va_end(vl);
 
-	cprintf("spawnl exec here\n");
+	//cprintf("spawnl exec here\n");
 	return spawn(prog, argv);
 }
 

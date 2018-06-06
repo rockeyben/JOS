@@ -96,7 +96,7 @@ flush_block(void *addr)
 		panic("ide write err: %e", r);
 
 
-	if ((r = sys_page_map(0, align_addr, 0, align_addr, PTE_SYSCALL)) < 0)
+	if ((r = sys_page_map(0, align_addr, 0, align_addr, uvpt[PGNUM(align_addr)] & PTE_SYSCALL)) < 0)
 		panic(" sys page map err: %e", r);
 	
 
