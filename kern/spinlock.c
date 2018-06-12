@@ -68,6 +68,7 @@ spin_lock(struct spinlock *lk)
 	// The xchg is atomic.
 	// It also serializes, so that reads after acquire are not
 	// reordered before it. 
+	//cprintf("xchg ing\n");
 	while (xchg(&lk->locked, 1) != 0)
 		asm volatile ("pause");
 

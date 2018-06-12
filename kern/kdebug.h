@@ -2,6 +2,7 @@
 #define JOS_KERN_KDEBUG_H
 
 #include <inc/types.h>
+#include <kern/pmap.h>
 
 // Debug information about a particular instruction pointer
 struct Eipdebuginfo {
@@ -15,6 +16,16 @@ struct Eipdebuginfo {
 	int eip_fn_narg;		// Number of function arguments
 };
 
+struct VMmappinginfo {
+	uintptr_t va;
+	physaddr_t pa;
+	uint32_t perm;
+};
+
 int debuginfo_eip(uintptr_t eip, struct Eipdebuginfo *info);
+
+int debuginfo_VMmapping(uintptr_t va, struct VMmappinginfo *info);
+
+int debug_set_VMperm(uintptr_t va, int perm);
 
 #endif

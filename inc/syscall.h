@@ -17,7 +17,11 @@ enum {
 	SYS_yield,
 	SYS_ipc_try_send,
 	SYS_ipc_recv,
+<<<<<<< HEAD
 	SYS_time_msec,
+=======
+	SYS_change_priority,
+>>>>>>> lab5
 	NSYSCALLS
 };
 

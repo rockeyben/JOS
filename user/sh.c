@@ -27,6 +27,8 @@ runcmd(char* s)
 	pipe_child = 0;
 	gettoken(s, 0);
 
+	int brace_stk = 0;
+
 again:
 	argc = 0;
 	while (1) {
@@ -55,7 +57,18 @@ again:
 			// then close the original 'fd'.
 
 			// LAB 5: Your code here.
-			panic("< redirection not implemented");
+			//panic("< redirection not implemented");
+			
+			if ((fd = open(t, O_RDONLY)) < 0){
+				cprintf("open %s for input: %e", t, fd);
+				exit();
+			}
+
+			if (fd != 0){
+				dup(fd, 0);
+				close(fd);
+			}
+			
 			break;
 
 		case '>':	// Output redirection
@@ -75,6 +88,7 @@ again:
 			break;
 
 		case '|':	// Pipe
+
 			if ((r = pipe(p)) < 0) {
 				cprintf("pipe: %e", r);
 				exit();
@@ -85,6 +99,7 @@ again:
 				cprintf("fork: %e", r);
 				exit();
 			}
+
 			if (r == 0) {
 				if (p[0] != 0) {
 					dup(p[0], 0);
@@ -103,6 +118,28 @@ again:
 			}
 			panic("| not implemented");
 			break;
+		
+		case ';':
+			if ((r = fork()) < 0) {
+				cprintf("fork: %e", r);
+				exit();
+			}
+			if (r == 0) {
+				goto runit;
+			} else {
+				wait(r);
+				goto again;
+			}
+			break;
+		
+		case '(':
+			break;
+		
+		case ')':
+			break;
+
+		
+
 
 		case 0:		// String is complete
 			// Run the current command!
@@ -235,6 +272,8 @@ _gettoken(char *s, char **p1, char **p2)
 int
 gettoken(char *s, char **p1)
 {
+	if(debug > 1)
+		cprintf("get into gettoken\n");
 	static int c, nc;
 	static char* np1, *np2;
 
@@ -244,7 +283,11 @@ gettoken(char *s, char **p1)
 	}
 	c = nc;
 	*p1 = np1;
+	//if(debug > 1)
+		//cprintf("Now is : %s\n", np2);
 	nc = _gettoken(np2, &np1, &np2);
+	if(debug > 1)
+		cprintf("The return token is %c %s\n", c, *p1);
 	return c;
 }
 
@@ -280,6 +323,7 @@ umain(int argc, char **argv)
 			usage();
 		}
 
+
 	if (argc > 2)
 		usage();
 	if (argc == 2) {
@@ -290,7 +334,7 @@ umain(int argc, char **argv)
 	}
 	if (interactive == '?')
 		interactive = iscons(0);
-
+	
 	while (1) {
 		char *buf;
 

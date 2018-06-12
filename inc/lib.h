@@ -59,7 +59,11 @@ int	sys_page_map(envid_t src_env, void *src_pg,
 int	sys_page_unmap(envid_t env, void *pg);
 int	sys_ipc_try_send(envid_t to_env, uint32_t value, void *pg, int perm);
 int	sys_ipc_recv(void *rcv_pg);
+<<<<<<< HEAD
 unsigned int sys_time_msec(void);
+=======
+int sys_change_priority(int val);
+>>>>>>> lab5
 
 // This must be inlined.  Exercise for reader: why?
 static inline envid_t __attribute__((always_inline))
@@ -137,6 +141,8 @@ int	pipeisclosed(int pipefd);
 
 // wait.c
 void	wait(envid_t env);
+envid_t pr_fork(int priority);
+
 
 /* File open modes */
 #define	O_RDONLY	0x0000		/* open for reading only */
