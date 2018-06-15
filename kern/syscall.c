@@ -12,6 +12,7 @@
 #include <kern/console.h>
 #include <kern/sched.h>
 #include <kern/time.h>
+#include <kern/e1000.h>
 
 // Print a string to the system console.
 // The string is exactly 'len' characters long.
@@ -346,7 +347,7 @@ sys_page_unmap(envid_t envid, void *va)
 	if((unsigned)va >= UTOP || va != ROUNDUP(va, PGSIZE))
 		return -E_INVAL;
 	
-	cprintf("try to unmap %x\n", va);
+	// cprintf("try to unmap %x\n", va);
 	
 	page_remove(e->env_pgdir, va);
 	//cprintf("unmap finish %x\n", va);
@@ -502,7 +503,23 @@ static int
 sys_time_msec(void)
 {
 	// LAB 6: Your code here.
-	panic("sys_time_msec not implemented");
+	// panic("sys_time_msec not implemented");
+
+	return time_msec();
+}
+
+static int
+sys_send_pkt(uint8_t * addr, size_t size)
+{
+	user_mem_assert(curenv, addr, size, PTE_U);
+	return e1000_trans_pkt(addr, size);
+}
+
+static int
+sys_recv_pkt(uint8_t * addr)
+{
+	user_mem_assert(curenv, addr, 1, PTE_U);
+	return e1000_recv_pkt(addr);
 }
 
 // Dispatches to the correct kernel function, passing the arguments.
@@ -531,6 +548,9 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
 		case SYS_ipc_try_send: return sys_ipc_try_send((envid_t)a1, (uint32_t)a2, (void*)a3, (unsigned int)a4);break;
 		case SYS_change_priority: return sys_change_priority((int)a1);
 		case SYS_env_set_trapframe: return sys_env_set_trapframe((envid_t)a1, (struct Trapframe*)a2);
+		case SYS_time_msec: return sys_time_msec();
+		case SYS_send_pkt: return sys_send_pkt((uint8_t*)a1, (size_t)a2);
+		case SYS_recv_pkt: return sys_recv_pkt((uint8_t*)a1);
 		default:
 			return -E_INVAL;
 	}

@@ -8,6 +8,9 @@
         "partition.h": "c",
         "fs.h": "c",
         "console.h": "c",
-        "fd.h": "c"
+        "fd.h": "c",
+        "assert.h": "c",
+        "x86.h": "c",
+        "pmap.c": "cpp"
     }
 }

@@ -1,31 +1,94 @@
-#ifndef JOS_KERN_E1000_H
-#define JOS_KERN_E1000_H
-#endif	// JOS_KERN_E1000_H
-#include <kern/pci.h>
-#include <kern/pmap.h>
-#include <inc/assert.h>
-#include <inc/string.h>
+/*******************************************************************************
 
-volatile uint32_t * e1000;
-int e1000_attach(struct pci_func * pcif);
-void desc_init();
-void e1000_init();
-int e1000_trans_pkt(uint8_t * addr, size_t size);
-int e1000_recv_pkt(uint8_t * addr);
+  Intel PRO/1000 Linux driver
+  Copyright(c) 1999 - 2006 Intel Corporation.
 
-#define E1000_TX_LEN   64
-#define E1000_RX_LEN   128
-#define E1000_TIPG_IPGT 0x3FF
-#define E1000_TIPG_IGPR1 0xFFA00
-#define E1000_TIPG_IGPR2 0x3FF00000
-#define DATA_SIZE 2048
+  This program is free software; you can redistribute it and/or modify it
+  under the terms and conditions of the GNU General Public License,
+  version 2, as published by the Free Software Foundation.
 
-struct e1000_data {
-    uint8_t data[DATA_SIZE];
-};
+  This program is distributed in the hope it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+  more details.
+
+  You should have received a copy of the GNU General Public License along with
+  this program; if not, see <http://www.gnu.org/licenses/>.
+
+  The full GNU General Public License is included in this distribution in
+  the file called "COPYING".
+
+  Contact Information:
+  Linux NICS <linux.nics@intel.com>
+  e1000-devel Mailing List <e1000-devel@lists.sourceforge.net>
+  Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR 97124-6497
+
+*******************************************************************************/
+
+/* e1000_hw.h
+ * Structures, enums, and macros for the MAC
+ */
+
+#ifndef _E1000_HW_H_
+#define _E1000_HW_H_
 
 
+/* PCI Device IDs */
+#define E1000_DEV_ID_82542               0x1000
+#define E1000_DEV_ID_82543GC_FIBER       0x1001
+#define E1000_DEV_ID_82543GC_COPPER      0x1004
+#define E1000_DEV_ID_82544EI_COPPER      0x1008
+#define E1000_DEV_ID_82544EI_FIBER       0x1009
+#define E1000_DEV_ID_82544GC_COPPER      0x100C
+#define E1000_DEV_ID_82544GC_LOM         0x100D
 #define E1000_DEV_ID_82540EM             0x100E
+#define E1000_DEV_ID_82540EM_LOM         0x1015
+#define E1000_DEV_ID_82540EP_LOM         0x1016
+#define E1000_DEV_ID_82540EP             0x1017
+#define E1000_DEV_ID_82540EP_LP          0x101E
+#define E1000_DEV_ID_82545EM_COPPER      0x100F
+#define E1000_DEV_ID_82545EM_FIBER       0x1011
+#define E1000_DEV_ID_82545GM_COPPER      0x1026
+#define E1000_DEV_ID_82545GM_FIBER       0x1027
+#define E1000_DEV_ID_82545GM_SERDES      0x1028
+#define E1000_DEV_ID_82546EB_COPPER      0x1010
+#define E1000_DEV_ID_82546EB_FIBER       0x1012
+#define E1000_DEV_ID_82546EB_QUAD_COPPER 0x101D
+#define E1000_DEV_ID_82541EI             0x1013
+#define E1000_DEV_ID_82541EI_MOBILE      0x1018
+#define E1000_DEV_ID_82541ER_LOM         0x1014
+#define E1000_DEV_ID_82541ER             0x1078
+#define E1000_DEV_ID_82547GI             0x1075
+#define E1000_DEV_ID_82541GI             0x1076
+#define E1000_DEV_ID_82541GI_MOBILE      0x1077
+#define E1000_DEV_ID_82541GI_LF          0x107C
+#define E1000_DEV_ID_82546GB_COPPER      0x1079
+#define E1000_DEV_ID_82546GB_FIBER       0x107A
+#define E1000_DEV_ID_82546GB_SERDES      0x107B
+#define E1000_DEV_ID_82546GB_PCIE        0x108A
+#define E1000_DEV_ID_82546GB_QUAD_COPPER 0x1099
+#define E1000_DEV_ID_82547EI             0x1019
+#define E1000_DEV_ID_82547EI_MOBILE      0x101A
+#define E1000_DEV_ID_82571EB_COPPER      0x105E
+#define E1000_DEV_ID_82571EB_FIBER       0x105F
+#define E1000_DEV_ID_82571EB_SERDES      0x1060
+#define E1000_DEV_ID_82571EB_QUAD_COPPER 0x10A4
+#define E1000_DEV_ID_82571PIG
+#define E1000_DEV_ID_ICH8_IFE_G          0x10C5
+#define E1000_DEV_ID_ICH8_IGP_M          0x104D
+
+/* Register Set. (82543, 82544)
+ *
+ * Registers are defined to be 32 bits and  should be accessed as 32 bit values.
+ * These registers are physically located on the NIC, but are mapped into the
+ * host memory address space.
+ *
+ * RW - register is both readable and writable
+ * RO - register is read only
+ * WO - register is write only
+ * R/clr - register is read only and is cleared when read
+ * A - register array
+ */
 #define E1000_CTRL     0x00000  /* Device Control - RW */
 #define E1000_CTRL_DUP 0x00004  /* Device Control Duplicate (Shadow) - RW */
 #define E1000_STATUS   0x00008  /* Device Status - RO */
@@ -45,7 +108,7 @@ struct e1000_data {
 #define E1000_ICS      0x000C8  /* Interrupt Cause Set - WO */
 #define E1000_IMS      0x000D0  /* Interrupt Mask Set - RW */
 #define E1000_IMC      0x000D8  /* Interrupt Mask Clear - WO */
-#define E1000_IAM      0x000E0  /* Interrupt Acknowledge Auto Mask */
+#define E1000_IAM      0x000E0  /* Interrupt Acknowledge Auto Mask */G
 #define E1000_RCTL     0x00100  /* RX Control - RW */
 #define E1000_RDTR1    0x02820  /* RX Delay Timer (1) - RW */
 #define E1000_RDBAL1   0x02900  /* RX Descriptor Base Address Low (1) - RW */
@@ -776,4 +839,5 @@ struct e1000_data_desc {
 /* For checksumming, the sum of all words in the EEPROM should equal 0xBABA. */
 #define EEPROM_SUM 0xBABA
 
+#endif /* _E1000_HW_H_ */
 

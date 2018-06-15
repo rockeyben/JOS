@@ -26,7 +26,6 @@ umain(int argc, char **argv)
 	char args[256];
 
 	cprintf("init: running\n");
-
 	want = 0xf989e;
 	if ((x = sum((char*)&data, sizeof data)) != want)
 		cprintf("init: data is not initialized: got sum %08x wanted %08x\n",

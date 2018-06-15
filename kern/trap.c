@@ -262,6 +262,8 @@ trap_dispatch(struct Trapframe *tf)
 		case 14: 
 			page_fault_handler(tf); return ;break;
 		case 32: 
+			//cprintf("cpu num is %d %d\n", cpunum(), thiscpu->cpu_id);
+			time_tick();
 			lapic_eoi();
 			sched_yield(); return ; break;
 		case 48: 
@@ -368,7 +370,7 @@ page_fault_handler(struct Trapframe *tf)
 
 	// Read processor's CR2 register to find the faulting address
 	fault_va = rcr2();
-	cprintf("The fault va is : %x eip is %x\n", fault_va, tf->tf_eip);
+	// cprintf("The fault va is : %x eip is %x\n", fault_va, tf->tf_eip);
 	// Handle kernel-mode page faults.
 
 	// LAB 3: Your code here.

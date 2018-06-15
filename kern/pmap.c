@@ -760,6 +760,7 @@ check_page_free_list(bool only_low_memory)
 		assert(page2pa(pp) != IOPHYSMEM);
 		assert(page2pa(pp) != EXTPHYSMEM - PGSIZE);
 		assert(page2pa(pp) != EXTPHYSMEM);
+		//cprintf("%x %x %x %x\n", page2pa(pp), EXTPHYSMEM, (char *) page2kva(pp), first_free_page);
 		assert(page2pa(pp) < EXTPHYSMEM || (char *) page2kva(pp) >= first_free_page);
 		// (new test for lab 4)
 		assert(page2pa(pp) != MPENTRY_PADDR);

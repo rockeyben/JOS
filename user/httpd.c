@@ -77,7 +77,32 @@ static int
 send_data(struct http_request *req, int fd)
 {
 	// LAB 6: Your code here.
-	panic("send_data not implemented");
+	// panic("send_data not implemented");
+
+	char * buf;
+	int r;
+	struct Stat stat;
+
+	if((r = fstat(fd, &stat)) < 0){
+		die("fstat failed");
+	}
+
+	if(stat.st_size > 1518){
+		die("packet size is too large, max 1518 bytes");
+	}
+
+	buf = malloc(stat.st_size);
+
+	if((r = readn(fd, buf, stat.st_size)) != stat.st_size){
+		die("Haven't finish reading entire data");
+	}
+
+	if((r = write(req->sock, buf, stat.st_size)) != stat.st_size){
+		die("Haven't finish sending back entire data");
+	}
+
+	free(buf);
+	return 0;
 }
 
 static int
@@ -223,7 +248,26 @@ send_file(struct http_request *req)
 	// set file_size to the size of the file
 
 	// LAB 6: Your code here.
-	panic("send_file not implemented");
+	// panic("send_file not implemented");
+
+	struct Stat stat;
+
+	if(fd = open(req->url, O_RDONLY) < 0){
+		send_error(req, 404);
+		r = fd;
+		goto end;
+	}
+
+	if((r = fstat(fd, &stat)) < 0)
+		goto end;
+	
+	if(stat.st_isdir){
+		send_error(req, 404);
+		r = -1;
+		goto end;
+	}
+
+	file_size = stat.st_size;
 
 	if ((r = send_header(req, 200)) < 0)
 		goto end;

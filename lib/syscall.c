@@ -121,6 +121,20 @@ unsigned int
 sys_time_msec(void)
 {
 	return (unsigned int) syscall(SYS_time_msec, 0, 0, 0, 0, 0, 0);
+}
+
+int
+sys_send_pkt(void * addr, size_t size)
+{
+	return (int) syscall(SYS_send_pkt, 0, (uint32_t)addr, size, 0, 0, 0);
+}
+
+int
+sys_recv_pkt(void * addr)
+{
+	return (int) syscall(SYS_recv_pkt, 0, (uint32_t)addr, 0, 0, 0, 0);
+}
+
 int
 sys_change_priority(int priority)
 {
