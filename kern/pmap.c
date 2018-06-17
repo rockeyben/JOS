@@ -584,7 +584,8 @@ page_remove(pde_t *pgdir, void *va)
 	pte_t * ptb = NULL;
 	//cprintf("try to page remove\n");
 	struct PageInfo * pp = page_lookup(pgdir, va, &ptb);
-	page_decref(pp);
+	if (pp)
+		page_decref(pp);
 	//cprintf("ptb is %x\n", ptb);
 	if(ptb != NULL){
 		*(ptb) = 0;
