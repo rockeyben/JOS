@@ -345,7 +345,7 @@ sys_page_unmap(envid_t envid, void *va)
 	if((unsigned)va >= UTOP || va != ROUNDUP(va, PGSIZE))
 		return -E_INVAL;
 	
-	cprintf("try to unmap %x\n", va);
+	// cprintf("try to unmap %x\n", va);
 	
 	page_remove(e->env_pgdir, va);
 	//cprintf("unmap finish %x\n", va);

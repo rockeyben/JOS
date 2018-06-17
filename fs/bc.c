@@ -23,7 +23,12 @@ va_is_dirty(void *va)
 {
 	return (uvpt[PGNUM(va)] & PTE_D) != 0;
 }
-
+// Is this virtual address accessed?
+bool
+va_is_accessed(void *va)
+{
+	return (uvpt[PGNUM(va)] & PTE_A) != 0;
+}
 // Fault any disk block that is read in to memory by
 // loading it from disk.
 static void
@@ -49,6 +54,31 @@ bc_pgfault(struct UTrapframe *utf)
 	//
 	// LAB 5: you code here:
 
+	// challenge
+	static int run_count = 0;
+	if ((run_count++) % 100)
+	{
+		if (super) {
+			uint32_t i;
+			for (i = 1; i < super->s_nblocks; ++i) {
+				void* addr = diskaddr(i);
+				if (va_is_mapped(addr)) {
+					if (va_is_accessed(addr)) {
+						if (va_is_dirty(addr)) {
+							flush_block(addr);
+						}
+						sys_page_map(0, addr, 0, addr, uvpt[PGNUM(addr)] & PTE_SYSCALL);
+					} else {
+						if (va_is_dirty(addr)) {
+							flush_block(addr);
+						}
+						sys_page_unmap(0, addr);
+					}
+				}
+			}
+		}
+	}
+
 	void * align_addr = ROUNDDOWN(addr, PGSIZE);
 	if ((r = sys_page_alloc(0, align_addr, PTE_W | PTE_U | PTE_P)) < 0)
 		panic("alloc err: %e", r);
@@ -57,7 +87,7 @@ bc_pgfault(struct UTrapframe *utf)
 
 	// Clear the dirty bit for the disk block page since we just read the
 	// block from disk
-	if ((r = sys_page_map(0, addr, 0, addr, uvpt[PGNUM(addr)] & PTE_SYSCALL)) < 0)
+	if ((r = sys_page_map(0, align_addr, 0, align_addr, uvpt[PGNUM(align_addr)] & PTE_SYSCALL)) < 0)
 		panic("in bc_pgfault, sys_page_map: %e", r);
 
 	// Check that the block we read was allocated. (exercise for

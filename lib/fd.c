@@ -116,9 +116,9 @@ fd_close(struct Fd *fd, bool must_exist)
 	//cprintf("fd clode %e %x\n", r, fd);
 	// Make sure fd is unmapped.  Might be a no-op if
 	// (*dev->dev_close)(fd) already unmapped it.
-	cprintf("try to sys unmap\n");
+	// cprintf("try to sys unmap\n");
 	(void) sys_page_unmap(0, fd);
-	cprintf("sys unmap finish \n");
+	//cprintf("sys unmap finish \n");
 	return r;
 }
 

@@ -280,7 +280,7 @@ umain(int argc, char **argv)
 {
 	int r, interactive, echocmds;
 	struct Argstate args;
-	cprintf("sh here\n");
+	//cprintf("sh here\n");
 
 	interactive = '?';
 	echocmds = 0;
@@ -300,7 +300,7 @@ umain(int argc, char **argv)
 			usage();
 		}
 
-	cprintf("sh here1\n");
+	//cprintf("sh here1\n");
 
 	if (argc > 2)
 		usage();
@@ -313,7 +313,7 @@ umain(int argc, char **argv)
 	if (interactive == '?')
 		interactive = iscons(0);
 	
-	cprintf("sh here2\n");
+	//cprintf("sh here2\n");
 
 	while (1) {
 		char *buf;
