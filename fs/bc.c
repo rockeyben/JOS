@@ -116,20 +116,15 @@ flush_block(void *addr)
 	// panic("flush_block not implemented");
 
 	void * align_addr = ROUNDDOWN(addr, PGSIZE);
-
 	// block is not in bc or is not dirty, do nothing
 	if((!va_is_mapped(align_addr)) || (!va_is_dirty(align_addr)))
 		return ;
-	
 	int r;
 	if ((r = ide_write(blockno*BLKSECTS, align_addr, BLKSECTS)) < 0)
 		panic("ide write err: %e", r);
-
-
 	if ((r = sys_page_map(0, align_addr, 0, align_addr, uvpt[PGNUM(align_addr)] & PTE_SYSCALL)) < 0)
 		panic(" sys page map err: %e", r);
 	
-
 }
 
 // Test that the block cache works, by smashing the superblock and

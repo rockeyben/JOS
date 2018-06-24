@@ -72,10 +72,8 @@ alloc_block(void)
 			flush_block(&bitmap[i/32]);
 			break;
 		}
-
 	if (find_one == -1)
 		return -E_NO_DISK;
-	
 	return find_one;
 }
 
@@ -198,15 +196,11 @@ file_get_block(struct File *f, uint32_t filebno, char **blk)
        // LAB 5: Your code here.
        // panic("file_get_block not implemented");
 	
-	//cprintf("heres\n");
 	uint32_t * ppdisk;
 	int r;
-	//cprintf("filebno %d \b", filebno);
 	if ((r = file_block_walk(f, filebno, &ppdisk, 1)) < 0)
 		return r;
-	
-	//cprintf("aaaaa %d\n", *ppdisk);
-	
+
 	if (*ppdisk == 0){
 		*ppdisk = alloc_block();
 		if (*ppdisk < 0)

@@ -310,16 +310,10 @@ copy_shared_pages(envid_t child)
 	// LAB 5: Your code here.
 	uint32_t addr;
 	for (addr = UTEXT; addr < USTACKTOP; addr += PGSIZE){
-		// don't copy user exception stack 
-		if(addr>= USTACKTOP && addr < UXSTACKTOP)
-			continue;
-		
 		if( (uvpd[PDX(addr)]&PTE_P) && (uvpt[PGNUM(addr)]&PTE_P) && (uvpt[PGNUM(addr)]&PTE_U) 
 			&& (uvpt[PGNUM(addr)]&PTE_SHARE)){
-			//cprintf("addr : %x\n", addr);
 			int r = 0;
 			r = sys_page_map(0, (void*)addr, child, (void*)addr, uvpt[PGNUM(addr)]&PTE_SYSCALL);
-			//cprintf("sys_page_map %d %x\n", r, uvpt[PGNUM(addr)]);
 			if (r < 0)
 				panic("copy share page %e\n", r);
 		}

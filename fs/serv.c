@@ -225,7 +225,6 @@ serve_read(envid_t envid, union Fsipc *ipc)
 	
 	o->o_fd->fd_offset += r;
 
-	//cprintf("success serve read\n");
 	return r;
 }
 
