@@ -291,7 +291,6 @@ serve_flush(envid_t envid, struct Fsreq_flush *req)
 	if ((r = openfile_lookup(envid, req->req_fileid, &o)) < 0)
 		return r;
 	file_flush(o->o_file);
-	cprintf("flush success\n");
 	return 0;
 }
 

@@ -14,7 +14,6 @@ readline(const char *prompt)
 	if (prompt != NULL)
 		cprintf("%s", prompt);
 #else
-	cprintf("try to fprint\n");
 	if (prompt != NULL)
 		fprintf(1, "%s", prompt);
 #endif

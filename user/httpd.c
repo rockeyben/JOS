@@ -252,7 +252,7 @@ send_file(struct http_request *req)
 
 	struct Stat stat;
 
-	if(fd = open(req->url, O_RDONLY) < 0){
+	if((fd = open(req->url, O_RDONLY)) < 0){
 		send_error(req, 404);
 		r = fd;
 		goto end;

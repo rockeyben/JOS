@@ -20,6 +20,19 @@ int e1000_recv_pkt(uint8_t * addr);
 #define E1000_TIPG_IGPR2 0x3FF00000
 #define DATA_SIZE 2048
 
+
+/* Receive Address */
+#define E1000_RAH_AV  0x80000000        /* Receive descriptor valid */
+
+
+#define EEPROM_MAC_ADDR1 0 /* the least sig word of MAC address*/
+#define EEPROM_MAC_ADDR2 1
+#define EEPROM_MAC_ADDR3 2
+
+#define E1000_MTA      0x05200  /* Multicast Table Array - RW Array */
+#define E1000_RAL      0x05400  /* Receive Address - RW Array */
+#define E1000_RAH      0x05404  /* Receive Address - RW Array */
+
 struct e1000_data {
     uint8_t data[DATA_SIZE];
 };
@@ -431,8 +444,9 @@ struct e1000_data {
 #define E1000_EEPROM_RW_REG_DONE   0x10 /* Offset to READ/WRITE done bit */
 #define E1000_EEPROM_RW_REG_START  1    /* First bit for telling part to start operation */
 #define E1000_EEPROM_RW_ADDR_SHIFT 8    /* Shift to the address bits */
+#define E1000_EEPROM_RW_REG_DATA_SHIFT 16
 #define E1000_EEPROM_POLL_WRITE    1    /* Flag for polling for write complete */
-#define E1000_EEPROM_POLL_READ     0    /* Flag for polling for read complete */
+#define E1000_EEPROM_POLL_READ     1    /* Flag for polling for read complete */
 /* Register Bit Masks */
 /* Device Control */
 #define E1000_CTRL_FD       0x00000001  /* Full duplex.0=half; 1=full */

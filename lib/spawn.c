@@ -319,7 +319,6 @@ copy_shared_pages(envid_t child)
 			//cprintf("addr : %x\n", addr);
 			int r = 0;
 			r = sys_page_map(0, (void*)addr, child, (void*)addr, uvpt[PGNUM(addr)]&PTE_SYSCALL);
-			cprintf("sys_page_map %d %x\n", r, uvpt[PGNUM(addr)]);
 			if (r < 0)
 				panic("copy share page %e\n", r);
 		}
