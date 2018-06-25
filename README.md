@@ -6,6 +6,17 @@
 
 这次操统实习课的project选择lab6，主要是为操作系统配置网络功能，在这个lab中，我们需要为JOS设置网卡的驱动，并完善一些基本的功能，比如传送、接收包。
 
+## Configuration
+
+本次的lab需要用课程专门的qemu版本，否则很多功能都实现不了，配置方法如下：
+
+```shell
+> git clone https://github.com/geofft/qemu.git qemu-1.7.0 -b 6.828-1.7.0 --depth=1 && cd qemu-1.7.0
+> ./configure --prefix=/home/oslab/qemu-1.7.0/dist --target-list="i386-softmmu"
+> make && make install
+> vim ../mit-jos/conf/env.mk
+```
+
 在开始写代码之前，我们需要对qemu里的网络配置有大体的了解，我做了一个总结，如下：
 
 ## Qemu's virtual network
