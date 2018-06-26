@@ -1,7 +1,5 @@
 # MIT 6.828 LAB4
 
-薛犇 1500012752
-
 ## Introduction
 
 这个Lab我们将实现抢占式的多进程机制。在Part A中我们将实现JOS中的round robin调度，以及一些基础的和进程相关的系统调用。Part B内，我们将实现unix风格的fork()，可以让一个进程生成自己的一份拷贝。在Part C中，我们会实现进程间通信（IPC）。
