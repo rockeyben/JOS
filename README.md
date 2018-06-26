@@ -1,7 +1,5 @@
 # MIT 6.828 LAB5
 
-薛犇 1500012752
-
 ### i node
 
 I 节点 region：包含了文件的重要的meta信息
